@@ -7,7 +7,8 @@ import Carousel from './components/Carousel';
 import Section from './components/Section';
 import HowToUse from './components/HowToUse';
 import Footer from './components/Footer';
-import AddTeacher from './components/AddTeacher'; // Import the new AddTeacher component
+import AddTeacher from './components/AddTeacher'; 
+import AddRoom from './components/AddRoom';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               </>
             } />
             <Route path="/add-teacher" element={<AddTeacher />} />
+            <Route path="/add-room" element={<AddRoom />} />
           </Routes>
           <Footer />
         </div>

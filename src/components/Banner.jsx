@@ -135,7 +135,7 @@ const Banner = () => {
             </Link>
           </motion.div>
           <motion.div variants={buttonVariants} initial="hidden" animate="visible">
-            <Link to="/room" className="bg-gray-100 text-blue-600 px-4 py-2 rounded hover:bg-blue-600 hover:text-gray-100 transition-colors duration-300 inline-block">
+            <Link to="/add-room" className="bg-gray-100 text-blue-600 px-4 py-2 rounded hover:bg-blue-600 hover:text-gray-100 transition-colors duration-300 inline-block">
               Add Room
             </Link>
           </motion.div>
