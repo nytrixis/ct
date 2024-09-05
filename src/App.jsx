@@ -9,6 +9,7 @@ import HowToUse from './components/HowToUse';
 import Footer from './components/Footer';
 import AddTeacher from './components/AddTeacher'; 
 import AddRoom from './components/AddRoom';
+import AddLab from './components/AddLab';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             } />
             <Route path="/add-teacher" element={<AddTeacher />} />
             <Route path="/add-room" element={<AddRoom />} />
+            <Route path="/add-lab" element={<AddLab />} />
           </Routes>
           <Footer />
         </div>
