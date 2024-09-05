@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const teacherRoutes = require('./routes/teacherRoutes');
+const roomRoutes = require('./routes/roomRoutes');
+
 
 
 
@@ -28,6 +30,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     console.error('MongoDB connection failed:', err);
   });
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/rooms', roomRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
