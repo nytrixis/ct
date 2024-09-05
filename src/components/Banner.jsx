@@ -96,11 +96,16 @@ const Banner = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                {['1st Semester', '3rd Semester', '5th Semester', '7th Semester'].map((sem) => (
-                  <Link key={sem} to={`/${sem}`} className="block px-4 py-2 text-blue-600 hover:bg-blue-600 hover:text-white">
-                    {sem}
+                {['1st', '3rd', '5th', '7th'].map((sem, index) => (
+                  <Link 
+                    key={sem} 
+                    to={`/semester/${2 * index + 1}`} 
+                    className="block px-4 py-2 text-blue-600 hover:bg-blue-600 hover:text-white"
+                  >
+                    {sem} Semester
                   </Link>
                 ))}
+
               </motion.div>
             )}
           </motion.div>
@@ -121,11 +126,16 @@ const Banner = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                {['2nd Semester', '4th Semester', '6th Semester', '8th Semester'].map((sem) => (
-                  <Link key={sem} to={`/${sem}`} className="block px-4 py-2 text-blue-600 z-30 hover:bg-blue-600 hover:text-white">
-                    {sem}
+                {['2nd', '4th', '6th', '8th'].map((sem, index) => (
+                  <Link 
+                    key={sem} 
+                    to={`/semester/${2 * index}`} 
+                    className="block px-4 py-2 text-blue-600 hover:bg-blue-600 hover:text-white"
+                  >
+                    {sem} Semester
                   </Link>
                 ))}
+
               </motion.div>
             )}
           </motion.div>
