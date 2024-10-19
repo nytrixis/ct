@@ -129,7 +129,7 @@ const Banner = () => {
                 {['2nd', '4th', '6th', '8th'].map((sem, index) => (
                   <Link 
                     key={sem} 
-                    to={`/semester/${2 * index}`} 
+                    to={`/semester/${2 * index + 2}`} 
                     className="block px-4 py-2 text-blue-600 hover:bg-blue-600 hover:text-white"
                   >
                     {sem} Semester
