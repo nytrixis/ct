@@ -2,9 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const teacherRoutes = require('./routes/teacherRoutes');
+const teacherRoutes = require('./routes/facultyRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const labRoutes = require('./routes/labRoutes');
+const subjectRoutes = require('./routes/subjectRoutes');
+const timetableRoutes = require('./routes/timetableRoutes');
 
 
 
@@ -33,6 +35,8 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/labs', labRoutes);
+app.use('/api/subjects', subjectRoutes);
+app.use('/api/timetable', timetableRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
