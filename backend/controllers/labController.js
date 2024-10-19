@@ -34,6 +34,19 @@ const addLab = async (req, res) => {
   }
 };
 
+// @desc    Get all labs
+// @route   GET /api/labs
+// @access  Public
+const getLabs = async (req, res) => {
+  try {
+    const labs = await Lab.find({});
+    res.json(labs);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   addLab,
+  getLabs,
 };
