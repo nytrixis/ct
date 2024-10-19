@@ -42,7 +42,7 @@ const getTimetableEntries = async (req, res) => {
 
     const timetableEntries = await TimetableEntry.find({ semester: parseInt(semester) })
       .populate('subject', 'name code')
-      .populate('faculty', 'name')
+      .populate('faculty', 'name shortForm')
       .populate('room', 'name');
 
     console.log('Timetable Entries:', timetableEntries); // Log the fetched entries
