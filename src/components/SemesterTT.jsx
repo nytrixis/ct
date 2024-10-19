@@ -12,7 +12,6 @@ const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 const SemesterTT = () => {
   const { semester, section } = useParams();
-  console.log('Timetable for semester:', semester, 'section:', section);
   const [timetableEntries, setTimetableEntries] = useState([]);
   const [error, setError] = useState('');
 
@@ -20,7 +19,7 @@ const SemesterTT = () => {
     const fetchTimetableEntries = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/timetable/${semester}`);
-        console.log('Fetched Timetable Entries:', response.data); // Log the fetched data
+        console.log('Fetched Timetable Entries:', response.data);
         setTimetableEntries(response.data);
       } catch (error) {
         console.error('Error fetching timetable entries:', error);
@@ -30,6 +29,8 @@ const SemesterTT = () => {
 
     fetchTimetableEntries();
   }, [semester]);
+
+  const isLunchBreak = (slot) => slot === '1:20 - 2:10';
 
   const getBgColor = (semester) => {
     const colors = {
@@ -46,49 +47,25 @@ const SemesterTT = () => {
   };
 
   const getEntryForCell = (day, timeSlot, batch, subSection) => {
-    console.log('Checking for entry:', { day, timeSlot, batch, subSection }); // Log the parameters
-    const entry = timetableEntries.find(entry => 
-      entry.day === day && 
-      entry.timeSlot === timeSlot && 
+    return timetableEntries.find(entry =>
+      entry.day === day &&
+      entry.timeSlot === timeSlot &&
       entry.batch === batch &&
       (entry.subSection === subSection || entry.subSection === 'both')
     );
-    console.log('Found entry:', entry); // Log the found entry
-    return entry;
   };
 
   const renderCell = (day, timeSlot, batch, subSection) => {
     const entry = getEntryForCell(day, timeSlot, batch, subSection);
-    if (!entry) {
-      return <div className="text-xs">Data not available</div>;
-    }
+    if (!entry) return <div className="text-xs">Data not available</div>;
 
     const { subject, faculty, room } = entry;
-
     return (
       <div className="text-xs">
         <div>{subject?.name || 'N/A'}</div>
         <div>{subject?.code || 'N/A'}</div>
         <div>{faculty?.shortForm || 'N/A'}</div>
-        <div>{typeof room === 'string' ? room : room?.name || 'N/A'}</div> {/* Handle room as string or object */}
-      </div>
-    );
-  };
-
-  const renderMergedCell = (day, timeSlot, batch, subSection) => {
-    const entry = getEntryForCell(day, timeSlot, batch, subSection);
-    if (!entry) {
-      return <div className="text-xs">Data not available</div>;
-    }
-
-    const { subject, faculty, room } = entry;
-
-    return (
-      <div className="text-xs">
-        <div>{subject?.name || 'N/A'}</div>
-        <div>{subject?.code || 'N/A'}</div>
-        <div>{faculty?.shortForm || 'N/A'}</div>
-        <div>{typeof room === 'string' ? room : room?.name || 'N/A'}</div> {/* Handle room as string or object */}
+        <div>{typeof room === 'string' ? room : room?.name || 'N/A'}</div>
       </div>
     );
   };
@@ -108,7 +85,6 @@ const SemesterTT = () => {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="flex justify-between items-center mb-8"
         >
-          {/* <h1 className="text-3xl font-bold text-white">Semester {semester} Timetable</h1> */}
           <div className="space-x-4">
             <Link
               to={`/semester/${semester}/add-subject`}
@@ -131,50 +107,46 @@ const SemesterTT = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="bg-white rounded-lg shadow-xl overflow-hidden"
         >
-          <div className="grid grid-cols-[auto,0.5fr,0.5fr,repeat(9,1fr)] gap-0.5 bg-gray-200 p-0.5">
+          <div className="grid grid-cols-[auto,0.5fr,repeat(9,1fr)] gap-0.5 bg-gray-200 p-0.5">
             <div className="bg-gray-100 p-2 font-bold">Day</div>
-            <div className="bg-gray-100 p-2 text-center font-bold">CSE1 / CSE2</div>
             <div className="bg-gray-100 p-2 text-center font-bold">X / Y</div>
             {timeSlots.map(slot => (
-              <div key={slot} className="bg-gray-100 p-2 text-center font-semibold">{slot}</div>
+              <div 
+                key={slot} 
+                className={`bg-gray-100 p-2 text-center font-semibold ${isLunchBreak(slot) ? 'bg-gray-300' : ''}`}
+              >
+                {slot}
+              </div>
             ))}
             {days.map(day => (
               <React.Fragment key={day}>
-                <div className="bg-gray-100 p-2 font-bold text-center">
+                <div className="bg-gray-100 p-2 font-bold text-center flex items-center justify-center h-full">
+                <div className="writing-vertical-lr transform">
                   {day.split('').map((char, i) => (
                     <span key={i} className="block">{char}</span>
                   ))}
-                </div>
-                <div className="bg-white p-2 border-r-2 border-gray-400 min-h-[80px] flex flex-col">
-                  <div className="border-b-2 border-gray-300 p-1 flex-grow text-center">
-                    <div className="text-xs font-semibold">CSE1</div>
-                  </div>
-                  <div className="p-1 flex-grow text-center">
-                    <div className="text-xs font-semibold">CSE2</div>
                   </div>
                 </div>
-                <div className="bg-white p-2 border-r-2 border-gray-400 min-h-[80px] flex flex-col">
-                  <div className="border-b-2 border-gray-300 p-1 flex-grow text-center">
+                <div className="bg-white p-2 border-r-2 border-gray-400 h-[235px] flex flex-col">
+                  <div className="border-b-2 border-gray-300 p-1 flex-grow text-center flex items-center justify-center">
                     <div className="text-xs font-semibold">X</div>
-                    <div className="text-xs font-semibold">Y</div>
                   </div>
-                  <div className="p-1 flex-grow text-center">
-                    <div className="text-xs font-semibold">X</div>
+                  <div className="p-1 flex-grow text-center flex items-center justify-center">
                     <div className="text-xs font-semibold">Y</div>
                   </div>
                 </div>
-                {timeSlots.map((slot, index) => (
+                {timeSlots.map((slot) => (
                   <div
-                    key={index}
-                    className={`bg-white p-2 min-h-[80px] border-r-2 border-gray-400 flex flex-col ${
-                      index === 4 ? 'bg-gray-300' : ''
+                    key={slot}
+                    className={`bg-white p-2 border-r-2 border-gray-400 h-[235px] flex flex-col ${
+                      isLunchBreak(slot) ? 'bg-gray-300' : ''
                     }`}
                   >
                     <div className="flex-1 border-b border-gray-300">
-                      {renderCell(day, slot, 'CSE1', 'X')}
+                      {renderCell(day, slot, section, 'X')}
                     </div>
                     <div className="flex-1">
-                      {renderCell(day, slot, 'CSE1', 'Y')}
+                      {renderCell(day, slot, section, 'Y')}
                     </div>
                   </div>
                 ))}
