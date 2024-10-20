@@ -1,8 +1,11 @@
 import React from 'react';
+import { useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { AuthContext } from './AuthContext.jsx';
 
 const SemesterPage = () => {
+  const { isAuthenticated } = useContext(AuthContext);
   const { semester } = useParams(); // Ensure useParams is correctly used
   console.log('Current semester:', semester);
 
@@ -28,12 +31,16 @@ const SemesterPage = () => {
           Semester {semester}
         </motion.h1>
         <motion.div className="flex flex-wrap justify-center space-x-4 mb-8" variants={itemVariants}>
+          
           <Link to={`/semester/${semester}/add-subject`} className="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition-colors duration-300 shadow-md">
             Add Subject
           </Link>
+          {isAuthenticated && (
           <Link to={`/semester/${semester}/create-timetable`} className="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition-colors duration-300 shadow-md">
             Create Timetable
           </Link>
+          )}
+          
         </motion.div>
         <motion.div variants={itemVariants}>
         <label className="block text-lg font-medium text-gray-700 mb-2">Select Section</label>
