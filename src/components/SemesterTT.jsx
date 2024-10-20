@@ -61,8 +61,9 @@ const SemesterTT = () => {
     );
   };
 
-  const getFacultyShortForm = (facultyObj) => {
-    return facultyObj.shortForm || 'N/A';
+  const getFacultyShortForm = (facultyId) => {
+    const faculty = faculties.find(fac => fac._id === facultyId);
+    return faculty ? faculty.shortForm : 'N/A';
   };
 
   const renderCell = (day, timeSlot, batch, subSection) => {
@@ -74,16 +75,16 @@ const SemesterTT = () => {
       ? faculty.map(getFacultyShortForm).join('+') 
       : getFacultyShortForm(faculty);
 
-      return (
-        <div className="text-xs">
-          <div className='font-semibold'>{subject?.name || 'N/A'}</div>
-          <div>{subject?.code || 'N/A'}</div>
-          <div>
-            ({facultyShortForms}) ({typeof room === 'string' ? room : room?.name || 'N/A'})
-          </div>
+    return (
+      <div className="text-xs">
+        <div className='font-semibold'>{subject?.name || 'N/A'}</div>
+        <div>{subject?.code || 'N/A'}</div>
+        <div>
+          ({facultyShortForms}) ({typeof room === 'string' ? room : room?.name || 'N/A'})
         </div>
-      );
-    };
+      </div>
+    );
+  };
 
   return (
     <motion.div
@@ -126,8 +127,8 @@ const SemesterTT = () => {
             <div className="bg-blue-100 p-2 font-bold">Day</div>
             <div className="bg-blue-100 p-2 text-center font-bold">X / Y</div>
             {timeSlots.map(slot => (
-              <div 
-                key={slot} 
+              <div
+                key={slot}
                 className={`bg-blue-100 p-2 text-center font-semibold ${isLunchBreak(slot) ? 'bg-gray-300' : ''}`}
               >
                 {slot}
@@ -150,21 +151,32 @@ const SemesterTT = () => {
                     <div className="text-xs font-semibold">Y</div>
                   </div>
                 </div>
-                {timeSlots.map((slot) => (
-                  <div
-                    key={slot}
-                    className={`bg-white p-2 border-r-2 border-gray-400 h-[235px] flex flex-col ${
-                      isLunchBreak(slot) ? 'bg-gray-200' : ''
-                    }`}
-                  >
-                    <div className="flex-1 border-b border-gray-300 flex-grow text-center flex items-center justify-center">
-                      {renderCell(day, slot, section, 'X')}
+                {timeSlots.map((slot) => {
+                  const entry = getEntryForCell(day, slot, section, 'both');
+                  return (
+                    <div
+                      key={slot}
+                      className={`bg-white p-2 border-r-2 border-gray-400 h-[235px] flex flex-col ${
+                        isLunchBreak(slot) ? 'bg-blue-100' : ''
+                      }`}
+                    >
+                      {entry ? (
+                        <div className="flex-1 flex-grow text-center flex items-center justify-center">
+                          {renderCell(day, slot, section, 'both')}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex-1 border-b border-gray-300 flex-grow text-center flex items-center justify-center">
+                            {renderCell(day, slot, section, 'X')}
+                          </div>
+                          <div className="flex-1 flex-grow text-center flex items-center justify-center">
+                            {renderCell(day, slot, section, 'Y')}
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <div className="flex-1 flex-grow text-center flex items-center justify-center">
-                      {renderCell(day, slot, section, 'Y')}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </React.Fragment>
             ))}
           </div>
