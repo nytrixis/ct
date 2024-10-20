@@ -8,7 +8,7 @@ const timetableEntrySchema = mongoose.Schema({
   day: { type: String, required: true },
   timeSlot: { type: String, required: true },
   subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', required: true },
-  faculty: { type: mongoose.Schema.Types.ObjectId, ref: 'Faculty', required: true },
+  faculty: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Faculty', required: true }],
   room: { type: String, required: true }
 }, {
   timestamps: true
