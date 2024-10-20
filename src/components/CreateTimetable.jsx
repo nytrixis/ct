@@ -164,6 +164,7 @@ const CreateTimetable = () => {
               >
                 <option value="CSE1">CSE1</option>
                 <option value="CSE2">CSE2</option>
+                <option value="CSE3">CSE3</option>
               </select>
             </div>
             <div className="mb-4">

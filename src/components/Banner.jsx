@@ -156,6 +156,7 @@ const Banner = () => {
           </motion.div>
         </div>
         <div className="flex space-x-2.5">
+          <Link to="/auth">
           <motion.button
             className="bg-green-500 text-gray-100 px-4 py-2 rounded hover:bg-green-600 transition-colors duration-300"
             variants={buttonVariants}
@@ -164,6 +165,8 @@ const Banner = () => {
           >
             Sign Up
           </motion.button>
+          </Link>
+          <Link to="/auth">
           <motion.button
             className="bg-green-500 text-gray-100 px-4 py-2 rounded hover:bg-green-600 transition-colors duration-300"
             variants={buttonVariants}
@@ -172,6 +175,7 @@ const Banner = () => {
           >
             Log In
           </motion.button>
+          </Link>
         </div>
       </div>
     </motion.div>

@@ -1,4 +1,4 @@
-const Faculty = require('../models/FAculty');
+const Faculty = require('../models/Faculty');
 
 // Async handler
 const asyncHandler = (fn) => (req, res, next) =>

@@ -14,6 +14,7 @@ import SemesterPage from './components/SemesterPage';
 import SemesterTT from './components/SemesterTT';
 import AddSubject from './components/AddSubject';
 import CreateTimetable from './components/CreateTimetable';
+import AuthPage from './components/AuthPage';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
                 <Connect />
               </>
             } />
+            <Route path="/auth" element={<AuthPage />} />
             <Route path="/add-teacher" element={<AddTeacher />} />
             <Route path="/add-room" element={<AddRoom />} />
             <Route path="/add-lab" element={<AddLab />} />
