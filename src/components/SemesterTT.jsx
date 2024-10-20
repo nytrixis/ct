@@ -61,9 +61,8 @@ const SemesterTT = () => {
     );
   };
 
-  const getFacultyShortForm = (facultyId) => {
-    const faculty = faculties.find(fac => fac._id === facultyId);
-    return faculty ? faculty.shortForm : 'N/A';
+  const getFacultyShortForm = (facultyObj) => {
+    return facultyObj.shortForm || 'N/A';
   };
 
   const renderCell = (day, timeSlot, batch, subSection) => {
@@ -72,7 +71,7 @@ const SemesterTT = () => {
 
     const { subject, faculty, room } = entry;
     const facultyShortForms = Array.isArray(faculty)
-      ? faculty.map(getFacultyShortForm).join('+')
+      ? faculty.map(f => getFacultyShortForm(f)).join('+')
       : getFacultyShortForm(faculty);
 
     return (
@@ -99,7 +98,7 @@ const SemesterTT = () => {
         }
         mergedCells.push({ start: index, end: index, entry: null });
       } else {
-        if (currentMerge && 
+        if (currentMerge &&
             currentMerge.entry.subject._id === entry.subject._id &&
             currentMerge.entry.faculty.toString() === entry.faculty.toString() &&
             currentMerge.entry.room === entry.room) {
