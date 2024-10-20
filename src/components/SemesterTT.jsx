@@ -13,14 +13,20 @@ const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const SemesterTT = () => {
   const { semester, section } = useParams();
   const [timetableEntries, setTimetableEntries] = useState([]);
+  const [faculties, setFaculties] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchTimetableEntries = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/timetable/${semester}`);
-        console.log('Fetched Timetable Entries:', response.data);
-        setTimetableEntries(response.data);
+        const [timetableRes, facultiesRes] = await Promise.all([
+          axios.get(`http://localhost:5000/api/timetable/${semester}`),
+          axios.get('http://localhost:5000/api/teachers')
+        ]);
+        console.log('Fetched Timetable Entries:', timetableRes.data);
+        console.log('Fetched Faculties:', facultiesRes.data);
+        setTimetableEntries(timetableRes.data);
+        setFaculties(facultiesRes.data);
       } catch (error) {
         console.error('Error fetching timetable entries:', error);
         setError('Error fetching timetable entries. Please try again.');
@@ -55,20 +61,29 @@ const SemesterTT = () => {
     );
   };
 
+  const getFacultyShortForm = (facultyObj) => {
+    return facultyObj.shortForm || 'N/A';
+  };
+
   const renderCell = (day, timeSlot, batch, subSection) => {
     const entry = getEntryForCell(day, timeSlot, batch, subSection);
     if (!entry) return <div className="text-xs">Data not available</div>;
 
     const { subject, faculty, room } = entry;
-    return (
-      <div className="text-xs">
-        <div>{subject?.name || 'N/A'}</div>
-        <div>{subject?.code || 'N/A'}</div>
-        <div>{faculty?.shortForm || 'N/A'}</div>
-        <div>{typeof room === 'string' ? room : room?.name || 'N/A'}</div>
-      </div>
-    );
-  };
+    const facultyShortForms = Array.isArray(faculty) 
+      ? faculty.map(getFacultyShortForm).join('+') 
+      : getFacultyShortForm(faculty);
+
+      return (
+        <div className="text-xs">
+          <div className='font-semibold'>{subject?.name || 'N/A'}</div>
+          <div>{subject?.code || 'N/A'}</div>
+          <div>
+            ({facultyShortForms}) ({typeof room === 'string' ? room : room?.name || 'N/A'})
+          </div>
+        </div>
+      );
+    };
 
   return (
     <motion.div
@@ -107,24 +122,24 @@ const SemesterTT = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="bg-white rounded-lg shadow-xl overflow-hidden"
         >
-          <div className="grid grid-cols-[auto,0.5fr,repeat(9,1fr)] gap-0.5 bg-gray-200 p-0.5">
-            <div className="bg-gray-100 p-2 font-bold">Day</div>
-            <div className="bg-gray-100 p-2 text-center font-bold">X / Y</div>
+          <div className="grid grid-cols-[auto,0.5fr,repeat(9,1fr)] gap-0.5 bg-gray-300 p-0.5">
+            <div className="bg-blue-100 p-2 font-bold">Day</div>
+            <div className="bg-blue-100 p-2 text-center font-bold">X / Y</div>
             {timeSlots.map(slot => (
               <div 
                 key={slot} 
-                className={`bg-gray-100 p-2 text-center font-semibold ${isLunchBreak(slot) ? 'bg-gray-300' : ''}`}
+                className={`bg-blue-100 p-2 text-center font-semibold ${isLunchBreak(slot) ? 'bg-gray-300' : ''}`}
               >
                 {slot}
               </div>
             ))}
             {days.map(day => (
               <React.Fragment key={day}>
-                <div className="bg-gray-100 p-2 font-bold text-center flex items-center justify-center h-full">
-                <div className="writing-vertical-lr transform">
-                  {day.split('').map((char, i) => (
-                    <span key={i} className="block">{char}</span>
-                  ))}
+                <div className="bg-blue-100 p-2 font-bold text-center flex items-center justify-center h-full">
+                  <div className="writing-vertical-lr transform">
+                    {day.toUpperCase().split('').map((char, i) => (
+                      <span key={i} className="block">{char}</span>
+                    ))}
                   </div>
                 </div>
                 <div className="bg-white p-2 border-r-2 border-gray-400 h-[235px] flex flex-col">
@@ -139,13 +154,13 @@ const SemesterTT = () => {
                   <div
                     key={slot}
                     className={`bg-white p-2 border-r-2 border-gray-400 h-[235px] flex flex-col ${
-                      isLunchBreak(slot) ? 'bg-gray-300' : ''
+                      isLunchBreak(slot) ? 'bg-gray-200' : ''
                     }`}
                   >
-                    <div className="flex-1 border-b border-gray-300">
+                    <div className="flex-1 border-b border-gray-300 flex-grow text-center flex items-center justify-center">
                       {renderCell(day, slot, section, 'X')}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 flex-grow text-center flex items-center justify-center">
                       {renderCell(day, slot, section, 'Y')}
                     </div>
                   </div>

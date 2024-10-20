@@ -10,7 +10,8 @@ const CreateTimetable = () => {
   const [day, setDay] = useState('Monday');
   const [timeSlot, setTimeSlot] = useState('');
   const [subject, setSubject] = useState('');
-  const [faculty, setFaculty] = useState('');
+  const [faculty1, setFaculty1] = useState('');
+  const [faculty2, setFaculty2] = useState('N/A');
   const [room, setRoom] = useState('');
   const [subjects, setSubjects] = useState([]);
   const [faculties, setFaculties] = useState([]);
@@ -55,30 +56,47 @@ const CreateTimetable = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        console.log('Selected Room ID:', room); // Log the selected room ID
-        const selectedRoom = classType === 'lab' ? labs.find(lab => lab._id === room)?.labNo : rooms.find(r => r._id === room)?.roomNo;
+      console.log('Selected Room ID:', room); // Log the selected room ID
+      const selectedRoom = classType === 'lab' ? labs.find(lab => lab._id === room)?.labNo : rooms.find(r => r._id === room)?.roomNo;
 
-        console.log('Selected Room:', selectedRoom); // Log the selected room
+      console.log('Selected Room:', selectedRoom); // Log the selected room
 
-        if (!selectedRoom) {
+      if (!selectedRoom) {
         setMessage('Please select a valid room or lab.');
         return;
-        }
+      }
+
+      console.log('Selected Faculty1:', faculty1); // Log the selected faculty1
+      console.log('Selected Faculty2:', faculty2); // Log the selected faculty2
+      console.log('Faculties:', faculties); // Log the faculties list
+
+      const faculty1Obj = faculties.find(fac => fac._id === faculty1);
+      const faculty2Obj = faculty2 !== 'N/A' ? faculties.find(fac => fac._id === faculty2) : null;
+
+      console.log('Faculty1 Object:', faculty1Obj); // Log the faculty1 object
+      console.log('Faculty2 Object:', faculty2Obj); // Log the faculty2 object
+
+      if (!faculty1Obj || (faculty2 !== 'N/A' && !faculty2Obj)) {
+        setMessage('Please select valid faculties.');
+        return;
+      }
+
+      const faculty = classType === 'lab' ? [faculty1Obj._id, faculty2Obj ? faculty2Obj._id : null].filter(Boolean) : [faculty1Obj._id];
 
       const payload = {
         semester: parseInt(semester),
         classType,
         batch,
-        subSection: classType === 'lab' ? subSection : 'both',
+        subSection,
         day,
         timeSlot,
         subject,
         faculty,
-        room: selectedRoom,
+        room: selectedRoom
       };
-  
+
       console.log('Payload:', payload); // Log the payload
-  
+
       const response = await axios.post('http://localhost:5000/api/timetable', payload);
       setMessage('Timetable entry added successfully!');
       // Reset form fields
@@ -88,7 +106,8 @@ const CreateTimetable = () => {
       setDay('Monday');
       setTimeSlot('');
       setSubject('');
-      setFaculty('');
+      setFaculty1('');
+      setFaculty2('N/A');
       setRoom('');
       setTimeout(() => navigate(`/semester/${semester}`), 2000);
     } catch (error) {
@@ -143,20 +162,18 @@ const CreateTimetable = () => {
                 <option value="CSE2">CSE2</option>
               </select>
             </div>
-            {classType === 'lab' && (
-              <div className="mb-4">
-                <label className="block text-white text-sm font-bold mb-2">Sub Section</label>
-                <select
-                  value={subSection}
-                  onChange={(e) => setSubSection(e.target.value)}
-                  className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
-                >
-                  <option value="X">X</option>
-                  <option value="Y">Y</option>
-                  <option value="both">Both</option>
-                </select>
-              </div>
-            )}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-bold mb-2">Sub Section</label>
+              <select
+                value={subSection}
+                onChange={(e) => setSubSection(e.target.value)}
+                className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+              >
+                <option value="X">X</option>
+                <option value="Y">Y</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
             <div className="mb-4">
               <label className="block text-white text-sm font-bold mb-2">Day</label>
               <select
@@ -195,19 +212,50 @@ const CreateTimetable = () => {
                 ))}
               </select>
             </div>
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">Faculty</label>
-              <select
-                value={faculty}
-                onChange={(e) => setFaculty(e.target.value)}
-                className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
-              >
-                <option value="">Select Faculty</option>
-                {faculties.map(fac => (
-                  <option key={fac._id} value={fac._id}>{fac.name}</option>
-                ))}
-              </select>
-            </div>
+            {classType === 'lab' ? (
+              <>
+                <div className="mb-4">
+                  <label className="block text-white text-sm font-bold mb-2">Faculty 1</label>
+                  <select
+                    value={faculty1}
+                    onChange={(e) => setFaculty1(e.target.value)}
+                    className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="">Select Faculty</option>
+                    {faculties.map(fac => (
+                      <option key={fac._id} value={fac._id}>{fac.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-white text-sm font-bold mb-2">Faculty 2</label>
+                  <select
+                    value={faculty2}
+                    onChange={(e) => setFaculty2(e.target.value)}
+                    className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="N/A">N/A</option>
+                    {faculties.map(fac => (
+                      <option key={fac._id} value={fac._id}>{fac.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : (
+              <div className="mb-4">
+                <label className="block text-white text-sm font-bold mb-2">Faculty</label>
+                <select
+                  value={faculty1}
+                  onChange={(e) => setFaculty1(e.target.value)}
+                  className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">Select Faculty</option>
+                  {faculties.map(fac => (
+                    <option key={fac._id} value={fac._id}>{fac.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="mb-4">
               <label className="block text-white text-sm font-bold mb-2">
                 {classType === 'lab' ? 'Lab' : 'Room'}
@@ -226,7 +274,7 @@ const CreateTimetable = () => {
           </div>
           <motion.button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 mt-4"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration:300 mt-4"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
