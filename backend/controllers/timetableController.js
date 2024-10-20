@@ -14,6 +14,20 @@ const isFacultyAvailable = async (faculty, day, timeSlot) => {
   return !existingEntry;
 };
 
+const isRoomOrLabAvailable = async (room, day, timeSlot) => {
+  const existingEntry = await TimetableEntry.findOne({
+    room: room,
+    day: day,
+    timeSlot: timeSlot
+  });
+
+  if (existingEntry) {
+    console.log('Room or Lab clash detected:', existingEntry);
+  }
+
+  return !existingEntry;
+};
+
 const addTimetableEntry = async (req, res) => {
   try {
     const { semester, classType, batch, subSection, day, timeSlot, subject, faculty, room } = req.body;
@@ -21,11 +35,18 @@ const addTimetableEntry = async (req, res) => {
     console.log('Request Body:', req.body);
     console.log('Checking availability for faculty:', faculty, 'on', day, 'at', timeSlot);
 
-    const isAvailable = await isFacultyAvailable(faculty, day, timeSlot);
-    console.log('Faculty availability:', isAvailable);
+    const isFacultyAvail = await isFacultyAvailable(faculty, day, timeSlot);
+    console.log('Faculty availability:', isFacultyAvail);
 
-    if (!isAvailable) {
+    if (!isFacultyAvail) {
       return res.status(409).json({ message: 'Faculty is not available at this time slot due to a scheduling conflict.' });
+    }
+
+    const isRoomAvail = await isRoomOrLabAvailable(room, day, timeSlot);
+    console.log('Room/Lab availability:', isRoomAvail);
+
+    if (!isRoomAvail) {
+      return res.status(409).json({ message: 'Room or Lab is not available at this time slot due to a scheduling conflict.' });
     }
 
     const timetableEntry = await TimetableEntry.create({
