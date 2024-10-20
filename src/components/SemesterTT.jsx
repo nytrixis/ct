@@ -71,8 +71,8 @@ const SemesterTT = () => {
     if (!entry) return <div className="text-xs">Data not available</div>;
 
     const { subject, faculty, room } = entry;
-    const facultyShortForms = Array.isArray(faculty) 
-      ? faculty.map(getFacultyShortForm).join('+') 
+    const facultyShortForms = Array.isArray(faculty)
+      ? faculty.map(getFacultyShortForm).join('+')
       : getFacultyShortForm(faculty);
 
     return (
@@ -84,6 +84,40 @@ const SemesterTT = () => {
         </div>
       </div>
     );
+  };
+
+  const getMergedCells = (day, batch, subSection) => {
+    let mergedCells = [];
+    let currentMerge = null;
+
+    timeSlots.forEach((slot, index) => {
+      const entry = getEntryForCell(day, slot, batch, subSection);
+      if (!entry || entry.subject === 'Data not available') {
+        if (currentMerge) {
+          mergedCells.push(currentMerge);
+          currentMerge = null;
+        }
+        mergedCells.push({ start: index, end: index, entry: null });
+      } else {
+        if (currentMerge && 
+            currentMerge.entry.subject._id === entry.subject._id &&
+            currentMerge.entry.faculty.toString() === entry.faculty.toString() &&
+            currentMerge.entry.room === entry.room) {
+          currentMerge.end = index;
+        } else {
+          if (currentMerge) {
+            mergedCells.push(currentMerge);
+          }
+          currentMerge = { start: index, end: index, entry };
+        }
+      }
+    });
+
+    if (currentMerge) {
+      mergedCells.push(currentMerge);
+    }
+
+    return mergedCells;
   };
 
   return (
@@ -151,32 +185,30 @@ const SemesterTT = () => {
                     <div className="text-xs font-semibold">Y</div>
                   </div>
                 </div>
-                {timeSlots.map((slot) => {
-                  const entry = getEntryForCell(day, slot, section, 'both');
-                  return (
-                    <div
-                      key={slot}
-                      className={`bg-white p-2 border-r-2 border-gray-400 h-[235px] flex flex-col ${
-                        isLunchBreak(slot) ? 'bg-blue-100' : ''
-                      }`}
-                    >
-                      {entry ? (
-                        <div className="flex-1 flex-grow text-center flex items-center justify-center">
-                          {renderCell(day, slot, section, 'both')}
+                {getMergedCells(day, section, 'both').map((mergedCell, index) => (
+                  <div
+                    key={index}
+                    className={`bg-white p-2 border-r-2 border-gray-400 flex flex-col ${
+                      isLunchBreak(timeSlots[mergedCell.start]) ? 'bg-blue-100' : ''
+                    }`}
+                    style={{ gridColumn: `span ${mergedCell.end - mergedCell.start + 1}` }}
+                  >
+                    {mergedCell.entry ? (
+                      <div className="flex-1 flex-grow text-center flex items-center justify-center">
+                        {renderCell(day, timeSlots[mergedCell.start], section, 'both')}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex-1 border-b border-gray-300 flex-grow text-center flex items-center justify-center">
+                          {renderCell(day, timeSlots[mergedCell.start], section, 'X')}
                         </div>
-                      ) : (
-                        <>
-                          <div className="flex-1 border-b border-gray-300 flex-grow text-center flex items-center justify-center">
-                            {renderCell(day, slot, section, 'X')}
-                          </div>
-                          <div className="flex-1 flex-grow text-center flex items-center justify-center">
-                            {renderCell(day, slot, section, 'Y')}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+                        <div className="flex-1 flex-grow text-center flex items-center justify-center">
+                          {renderCell(day, timeSlots[mergedCell.start], section, 'Y')}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
               </React.Fragment>
             ))}
           </div>
