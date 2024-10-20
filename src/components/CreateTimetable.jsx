@@ -111,8 +111,12 @@ const CreateTimetable = () => {
       setRoom('');
       setTimeout(() => navigate(`/semester/${semester}`), 2000);
     } catch (error) {
+      if (error.response && error.response.status === 409) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage('Error adding timetable entry. Please try again.');
+      }
       console.error('Error adding timetable entry:', error);
-      setMessage('Error adding timetable entry. Please try again.');
     }
   };
 
