@@ -67,7 +67,7 @@ const SemesterTT = () => {
 
   const renderCell = (day, timeSlot, batch, subSection) => {
     const entry = getEntryForCell(day, timeSlot, batch, subSection);
-    if (!entry) return <div className="text-xs">Data not available</div>;
+    if (!entry) return <div className="text-xs"> </div>;
 
     const { subject, faculty, room } = entry;
     const facultyShortForms = Array.isArray(faculty)
@@ -188,7 +188,7 @@ const SemesterTT = () => {
                   <div
                     key={index}
                     className={`bg-white p-2 border-r-2 border-gray-400 flex flex-col ${
-                      isLunchBreak(timeSlots[mergedCell.start]) ? 'bg-blue-100' : ''
+                      isLunchBreak(timeSlots[mergedCell.start]) ? 'bg-gray-200' : ''
                     }`}
                     style={{ gridColumn: `span ${mergedCell.end - mergedCell.start + 1}` }}
                   >
