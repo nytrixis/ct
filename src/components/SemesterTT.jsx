@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import html2canvas from 'html2canvas';
 
@@ -11,11 +11,21 @@ const timeSlots = [
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
+
+
+
+
 const SemesterTT = () => {
+  const navigate = useNavigate();
   const { semester, section } = useParams();
   const [timetableEntries, setTimetableEntries] = useState([]);
   const [faculties, setFaculties] = useState([]);
   const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
+  const cellClassName = `bg-white p-2 border-r-2 border-gray-400 ${
+    isEditing ? 'hover:bg-blue-50 cursor-pointer' : ''
+  }`;
 
   useEffect(() => {
     const fetchTimetableEntries = async () => {
@@ -36,6 +46,20 @@ const SemesterTT = () => {
 
     fetchTimetableEntries();
   }, [semester]);
+
+  const handleCellUpdate = (day, timeSlot, batch, subSection) => {
+    const existingEntry = getEntryForCell(day, timeSlot, batch, subSection);
+    navigate(`/semester/${semester}/create-timetable`, {
+      state: {
+        day,
+        timeSlot,
+        batch,
+        subSection,
+        existingEntry,
+        isUpdate: true
+      }
+    });
+  };
 
   const isLunchBreak = (slot) => slot === '1:20 - 2:10';
 
@@ -99,23 +123,31 @@ const SemesterTT = () => {
 
   const renderCell = (day, timeSlot, batch, subSection) => {
     const entry = getEntryForCell(day, timeSlot, batch, subSection);
-    if (!entry) return <div className="text-xs"> </div>;
-
-    const { subject, faculty, room } = entry;
-    const facultyShortForms = Array.isArray(faculty)
-      ? faculty.map(f => getFacultyShortForm(f)).join('+')
-      : getFacultyShortForm(faculty);
-
-    return (
+    const cellContent = !entry ? (
+      <div className="text-xs"> </div>
+    ) : (
       <div className="text-xs">
-        <div className='font-semibold'>{subject?.name || 'N/A'}</div>
-        <div>{subject?.code || 'N/A'}</div>
+        <div className='font-semibold'>{entry.subject?.name || 'N/A'}</div>
+        <div>{entry.subject?.code || 'N/A'}</div>
         <div>
-          ({facultyShortForms}) ({typeof room === 'string' ? room : room?.name || 'N/A'})
+          ({Array.isArray(entry.faculty) 
+            ? entry.faculty.map(f => getFacultyShortForm(f)).join('+')
+            : getFacultyShortForm(entry.faculty)}) 
+          ({typeof entry.room === 'string' ? entry.room : entry.room?.name || 'N/A'})
         </div>
       </div>
     );
+
+    return isEditing ? (
+      <div 
+        onClick={() => handleCellUpdate(day, timeSlot, batch, subSection)}
+        className="cursor-pointer hover:bg-blue-100 transition-colors duration-200 p-1 rounded"
+      >
+        {cellContent}
+      </div>
+    ) : cellContent;
   };
+
 
   const getMergedCells = (day, batch, subSection) => {
     let mergedCells = [];
@@ -180,6 +212,12 @@ const SemesterTT = () => {
               Create Timetable
             </Link>
             <button
+      onClick={() => setIsEditing(!isEditing)}
+      className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors duration-300"
+    >
+      {isEditing ? 'Cancel Edit' : 'Edit Timetable'}
+    </button>
+            <button
               onClick={handlePrint}
               className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition-colors duration-300"
             >
@@ -199,13 +237,22 @@ const SemesterTT = () => {
             <div className="bg-blue-100 p-2 font-bold">Day</div>
             <div className="bg-blue-100 p-2 text-center font-bold">X / Y</div>
             {timeSlots.map(slot => (
-              <div
-                key={slot}
-                className={`bg-blue-100 p-2 text-center font-semibold ${isLunchBreak(slot) ? 'bg-gray-300' : ''}`}
-              >
-                {slot}
-              </div>
-            ))}
+  <div
+    key={slot}
+    className={`bg-blue-100 p-2 text-center font-semibold ${isLunchBreak(slot) ? 'bg-gray-300' : ''}`}
+  >
+    {isEditing ? (
+      <div 
+        onClick={() => handleCellUpdate(day, slot, batch, subSection)}
+        className="cursor-pointer hover:bg-blue-200 transition-colors duration-200"
+      >
+        {slot}
+      </div>
+    ) : (
+      slot
+    )}
+  </div>
+))}
             {days.map(day => (
               <React.Fragment key={day}>
                 <div className="bg-blue-100 p-2 font-bold text-center flex items-center justify-center h-full">
@@ -224,29 +271,29 @@ const SemesterTT = () => {
                   </div>
                 </div>
                 {getMergedCells(day, section, 'both').map((mergedCell, index) => (
-                  <div
-                    key={index}
-                    className={`bg-white p-2 border-r-2 border-gray-400 flex flex-col ${
-                      isLunchBreak(timeSlots[mergedCell.start]) ? 'bg-gray-200' : ''
-                    }`}
-                    style={{ gridColumn: `span ${mergedCell.end - mergedCell.start + 1}` }}
-                  >
-                    {mergedCell.entry ? (
-                      <div className="flex-1 flex-grow text-center flex items-center justify-center">
-                        {renderCell(day, timeSlots[mergedCell.start], section, 'both')}
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex-1 border-b border-gray-300 flex-grow text-center flex items-center justify-center">
-                          {renderCell(day, timeSlots[mergedCell.start], section, 'X')}
-                        </div>
-                        <div className="flex-1 flex-grow text-center flex items-center justify-center">
-                          {renderCell(day, timeSlots[mergedCell.start], section, 'Y')}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
+    <div
+      key={index}
+      className={`${cellClassName} flex flex-col ${
+        isLunchBreak(timeSlots[mergedCell.start]) ? 'bg-gray-200' : ''
+      }`}
+      style={{ gridColumn: `span ${mergedCell.end - mergedCell.start + 1}` }}
+    >
+      {mergedCell.entry ? (
+        <div className="flex-1 flex-grow text-center flex items-center justify-center">
+          {renderCell(day, timeSlots[mergedCell.start], section, 'both')}
+        </div>
+      ) : (
+        <>
+          <div className="flex-1 border-b border-gray-300 flex-grow text-center flex items-center justify-center">
+            {renderCell(day, timeSlots[mergedCell.start], section, 'X')}
+          </div>
+          <div className="flex-1 flex-grow text-center flex items-center justify-center">
+            {renderCell(day, timeSlots[mergedCell.start], section, 'Y')}
+          </div>
+        </>
+      )}
+    </div>
+  ))}
               </React.Fragment>
             ))}
           </div>
