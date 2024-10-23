@@ -55,6 +55,14 @@ const CreateTimetable = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    console.log('Current token:', localStorage.getItem('token'));
+
     try {
       console.log('Selected Room ID:', room); // Log the selected room ID
       const selectedRoom = classType === 'lab' ? labs.find(lab => lab._id === room)?.labNo : rooms.find(r => r._id === room)?.roomNo;
@@ -97,7 +105,7 @@ const CreateTimetable = () => {
 
       console.log('Payload:', payload); // Log the payload
 
-      const response = await axios.post('http://localhost:5000/api/timetable', payload);
+      const response = await axios.post('http://localhost:5000/api/timetable', payload, config);
       setMessage('Timetable entry added successfully!');
       // Reset form fields
       setClassType('theory');

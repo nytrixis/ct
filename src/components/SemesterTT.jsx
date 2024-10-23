@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
+import html2canvas from 'html2canvas';
 
 const timeSlots = [
   '10:00 - 10:50', '10:50 - 11:40', '11:40 - 12:30', '12:30 - 1:20',
@@ -51,6 +52,37 @@ const SemesterTT = () => {
     };
     return colors[semester] || 'from-gray-400 to-gray-600';
   };
+
+  // Add this function to handle printing
+  const handlePrint = () => {
+    const timetableElement = document.getElementById(`timetable-${semester}-${section}`);
+    
+    html2canvas(timetableElement).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const printWindow = window.open('', '', 'height=600,width=800');
+      
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Semester ${semester} Section ${section} Timetable</title>
+            <style>
+              body { margin: 0; display: flex; justify-content: center; }
+              img { max-width: 100%; height: auto; }
+            </style>
+          </head>
+          <body>
+            <img src="${imgData}" alt="Timetable">
+          </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 500);
+    });
+  };
+  
+
 
   const getEntryForCell = (day, timeSlot, batch, subSection) => {
     return timetableEntries.find(entry =>
@@ -147,10 +179,17 @@ const SemesterTT = () => {
             >
               Create Timetable
             </Link>
+            <button
+              onClick={handlePrint}
+              className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition-colors duration-300"
+            >
+              Print Timetable
+            </button>
           </div>
         </motion.div>
 
         <motion.div
+          id={`timetable-${semester}-${section}`}
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}

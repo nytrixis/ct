@@ -1,0 +1,4 @@
+Update time table entries
+print pdf
+auto refresh
+swap between 2 classes (semester wise)
